@@ -17,6 +17,6 @@ public class RequestSource {
     }
 
     public Request next() {
-        return requests[++index];
+        return requests[index++];
     }
 }
