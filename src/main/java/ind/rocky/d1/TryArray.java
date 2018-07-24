@@ -7,11 +7,17 @@ public class TryArray {
     public static void main(String[] args) {
         Request[] requests = buildRequests(RNUM);
         Result[] results = buildResults(RNUM);
-        Long startTimestamp = getTimestamp();
-        handleRequests(requests, results);
-        Long endTimestamp = getTimestamp();
-        System.out.println("Total Time cost: "+(endTimestamp-startTimestamp));
+        Handler handler = new SimpleHandler();
+        long duration = handleRequest(requests, results, handler);
+        System.out.println("Total Time cost: "+ duration);
         assertResult(results);
+    }
+
+    private static long handleRequest(Request[] requests, Result[] results, Handler handler) {
+        Long startTimestamp = getTimestamp();
+        handler.handleRequests(requests, results);
+        Long endTimestamp = getTimestamp();
+        return endTimestamp - startTimestamp;
     }
 
     private static void assertResult(Result[] results) {
@@ -24,13 +30,6 @@ public class TryArray {
     private static void assertEquals(long n1, long n2) {
         if (n1!=n2) {
             throw new RuntimeException("It is not equals.");
-        }
-    }
-
-    private static void handleRequests(Request[] requests, Result[] results) {
-        for (int f = 0; f<requests.length; f++) {
-            Result result = new Result((long)f, requests[f].num * 2 % 10);
-            results[f] = result;
         }
     }
 
