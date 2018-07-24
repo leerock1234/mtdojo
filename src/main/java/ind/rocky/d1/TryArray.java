@@ -1,15 +1,22 @@
 package ind.rocky.d1;
 
+import sun.java2d.pipe.SpanShapeRenderer;
+
 public class TryArray {
 
     public static final int RNUM = 1000000;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InstantiationException, IllegalAccessException {
         Request[] requests = buildRequests(RNUM);
+        handle(MulTdSimpleHandler.class, requests);
+        handle(SimpleHandler.class, requests);
+    }
+
+    private static void handle(Class handlerClass, Request[] requests) throws IllegalAccessException, InstantiationException {
         Result[] results = buildResults(RNUM);
-        Handler handler = new SimpleHandler();
+        Handler handler = (Handler) handlerClass.newInstance();
         long duration = handleRequest(requests, results, handler);
-        System.out.println("Total Time cost: "+ duration);
+        System.out.println("Time cost of "+handlerClass.getSimpleName()+": "+ duration);
         assertResult(results);
     }
 
