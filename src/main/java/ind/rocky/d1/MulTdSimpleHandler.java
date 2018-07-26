@@ -3,9 +3,10 @@ package ind.rocky.d1;
 public class MulTdSimpleHandler implements Handler {
 
     @Override
-    public void handleRequests(Request[] requests, Result[] results) {
-
-        int length = requests.length / 4;
+    public Result[] handleRequests(Request[] requests) {
+        return null;
+/*
+        int length = requests.length / 2;
 
         TheRun run1 = new TheRun(requests, results, length*0, length);
         Thread thread1 = new Thread(run1);
@@ -15,22 +16,22 @@ public class MulTdSimpleHandler implements Handler {
         Thread thread2 = new Thread(run2);
         thread2.start();
 
-        TheRun run3 = new TheRun(requests, results, length*2,length);
-        Thread thread3 = new Thread(run3);
-        thread3.start();
-
-        TheRun run4 = new TheRun(requests, results,length*3,length);
-        Thread thread4 = new Thread(run4);
-        thread4.start();
+//        TheRun run3 = new TheRun(requests, results, length*2,length);
+//        Thread thread3 = new Thread(run3);
+//        thread3.start();
+//
+//        TheRun run4 = new TheRun(requests, results,length*3,length);
+//        Thread thread4 = new Thread(run4);
+//        thread4.start();
 
         try {
             thread1.join();
             thread2.join();
-            thread3.join();
-            thread4.join();
+*//*            thread3.join();
+            thread4.join();*//*
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }
+        }*/
     }
 
     class TheRun implements Runnable {
@@ -49,7 +50,6 @@ public class MulTdSimpleHandler implements Handler {
                 Result result = new Result((long)f, requests[f].num * 2 % 10);
                 results[f] = result;
             }
-
         }
     }
 }

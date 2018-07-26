@@ -4,27 +4,28 @@ import sun.java2d.pipe.SpanShapeRenderer;
 
 public class TryArray {
 
-    public static final int RNUM = 1000000;
+    public static final int RNUM = 50000000;
 
     public static void main(String[] args) throws InstantiationException, IllegalAccessException {
         Request[] requests = buildRequests(RNUM);
-        handle(MulTdSimpleHandler.class, requests);
+        //handle(StreamHandler.class, requests);
         handle(SimpleHandler.class, requests);
     }
 
     private static void handle(Class handlerClass, Request[] requests) throws IllegalAccessException, InstantiationException {
-        Result[] results = buildResults(RNUM);
         Handler handler = (Handler) handlerClass.newInstance();
-        long duration = handleRequest(requests, results, handler);
-        System.out.println("Time cost of "+handlerClass.getSimpleName()+": "+ duration);
-        assertResult(results);
+        TestResult testResult = handleRequest(requests, handler);
+        System.out.println("Time cost of "+handlerClass.getSimpleName()+": "+ testResult.duration);
+        assertResult(testResult.results);
     }
 
-    private static long handleRequest(Request[] requests, Result[] results, Handler handler) {
+    private static TestResult handleRequest(Request[] requests, Handler handler) {
         Long startTimestamp = getTimestamp();
-        handler.handleRequests(requests, results);
+        TestResult testResult = new TestResult();
+        testResult.results = handler.handleRequests(requests);
         Long endTimestamp = getTimestamp();
-        return endTimestamp - startTimestamp;
+        testResult.duration = endTimestamp - startTimestamp;
+        return testResult;
     }
 
     private static void assertResult(Result[] results) {
