@@ -11,7 +11,7 @@ public class StreamHandler implements Handler {
     }
 
     static Result handle(Request request){
-        return new Result(request.requestId, request.num * 2 % 10);
+        return new Result(request.seed, request.loopnum * 2 % 10);
     }
 
 }

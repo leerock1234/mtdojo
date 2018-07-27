@@ -1,55 +1,54 @@
 package ind.rocky.d1;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 public class MulTdSimpleHandler implements Handler {
 
     @Override
     public Result[] handleRequests(Request[] requests) {
-        return null;
-/*
-        int length = requests.length / 2;
+        List<Thread> threads = new ArrayList<>();
+        List<TheRun> runables = new ArrayList<>();
+        for(Request request : requests){
+            TheRun run1 = new TheRun(request);
+            Thread thread1 = new Thread(run1);
+            thread1.start();
+            threads.add(thread1);
+            runables.add(run1);
+        }
+        for(Thread thread : threads) {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        long resultNum=0;
+        for(TheRun theRun : runables){
+            resultNum = (resultNum + theRun.resultNum) % 10;
+        }
 
-        TheRun run1 = new TheRun(requests, results, length*0, length);
-        Thread thread1 = new Thread(run1);
-        thread1.start();
+        Result[] results = new Result[1];
+        results[0] = new Result(1l, resultNum);
 
-        TheRun run2 = new TheRun(requests, results, length*1, length);
-        Thread thread2 = new Thread(run2);
-        thread2.start();
-
-//        TheRun run3 = new TheRun(requests, results, length*2,length);
-//        Thread thread3 = new Thread(run3);
-//        thread3.start();
-//
-//        TheRun run4 = new TheRun(requests, results,length*3,length);
-//        Thread thread4 = new Thread(run4);
-//        thread4.start();
-
-        try {
-            thread1.join();
-            thread2.join();
-*//*            thread3.join();
-            thread4.join();*//*
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }*/
+        return results;
     }
 
     class TheRun implements Runnable {
-        int start;
-        int num;
-        Request[] requests;
-        Result[] results;
-        public TheRun(Request[] requests, Result[] results, int start, int num){
-            this.requests = requests;
-            this.results = results;
-            this.start = start;
-            this.num = num;
+        Request request;
+        Long resultNum=0l;
+        public TheRun(Request request){
+            this.request = request;
         }
         public void run() {
-            for (int f = start; f<start+num; f++) {
-                Result result = new Result((long)f, requests[f].num * 2 % 10);
-                results[f] = result;
+            Random random = new Random(request.seed);
+            long start = System.currentTimeMillis();
+            for (long f = 0; f < request.loopnum; f++) {
+                resultNum = (resultNum + random.nextInt(10)) % 10;
             }
+            long end = System.currentTimeMillis();
+            System.out.println("Time cost of thread with seed "+request.seed+": "+ (end-start));
         }
     }
 }

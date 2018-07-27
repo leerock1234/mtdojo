@@ -1,15 +1,14 @@
 package ind.rocky.d1;
 
-import sun.java2d.pipe.SpanShapeRenderer;
+public class TryMultiThread {
 
-public class TryArray {
-
-    public static final int RNUM = 50000000;
+    public static final int RNUM = 100000000;
 
     public static void main(String[] args) throws InstantiationException, IllegalAccessException {
-        Request[] requests = buildRequests(RNUM);
+        Request[] requests = buildRequests(9, 3, 4);
         //handle(StreamHandler.class, requests);
-        handle(SimpleHandler.class, requests);
+        //handle(SimpleHandler.class, requests);
+        handle(MulTdSimpleHandler.class, requests);
     }
 
     private static void handle(Class handlerClass, Request[] requests) throws IllegalAccessException, InstantiationException {
@@ -29,15 +28,12 @@ public class TryArray {
     }
 
     private static void assertResult(Result[] results) {
-        for (int f = 0; f<results.length; f++) {
-            assertEquals(f, results[f].resultId);
-            assertEquals(f*2%10, results[f].num);
-        }
+        assertEquals(6, results[0].num);
     }
 
     private static void assertEquals(long n1, long n2) {
         if (n1!=n2) {
-            throw new RuntimeException("It is not equals.");
+            throw new RuntimeException("It is not equals, the left is "+n1+", but the right is "+n2);
         }
     }
 
@@ -46,11 +42,10 @@ public class TryArray {
         return results;
     }
 
-    private static Request[] buildRequests(int i) {
-        Request[] requests = new Request[i];
-        for (int j = 0; j < i; j++) {
-            long l = j;
-            requests[j] = new Request(l, l);
+    private static Request[] buildRequests(int ... seeds) {
+        Request[] requests = new Request[seeds.length];
+        for (int i = 0; i < seeds.length; i++) {
+            requests[i] = new Request((long)seeds[i], (long)RNUM);
         }
         return requests;
     }
