@@ -1,11 +1,24 @@
 package ind.rocky.timequeue;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
 import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 public class TimeQueueTest {
+
+    @Test(expected = NotStartedException.class)
+    public void should_throw_error_when_used_without_start(){
+        TimeQueue<TO> timeQueue = new TimeQueue<>();
+        timeQueue.put(new TO(1),0);
+        timeQueue.get();
+    }
 
     @Test
     public void should_work_like_normal_queue_if_timestamp_are_zero(){
@@ -40,10 +53,48 @@ public class TimeQueueTest {
     @Test
     public void should_support_multiple_threads(){
         TimeQueue<TO> timeQueue = new TimeQueue<>();
+        for (int i = 1; i <=100 ; i++) {
+            timeQueue.put(new TO(i),5);
+        }
+        List<TRetrive> ts = new ArrayList<>();
+        for (int i = 1; i <=100 ; i++) {
+            ts.add(new TRetrive(timeQueue, String.valueOf(i)));
+        }
+        long startTime = timeQueue.startTime();
+        for(TRetrive t : ts){
+            t.start();
+        }
+        try {
+            for(TRetrive t : ts){
+                t.join();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        List<Long> tTimes = new ArrayList<>();
+        for(TRetrive t : ts){
+            tTimes.add(t.retriveTimestamp-startTime);
+        }
+        tTimes.sort(new Comparator<Long>() {
+            @Override
+            public int compare(Long o1, Long o2) {
+                return o1.compareTo(o2);
+            }
+        });
+
+        for (int i = 5; i < 100; i++) {
+            assertThat("Verifying No. "+i+" Thread.", tTimes.get(i), greaterThanOrEqualTo(5l*(i+1)));
+            assertThat("Verifying No. "+i+" Thread.", tTimes.get(i), lessThan(5l*(i+1)+20));
+        }
+    }
+
+    @Test
+    public void should_support_two_threads(){
+        TimeQueue<TO> timeQueue = new TimeQueue<>();
         timeQueue.put(new TO(1),100);
         timeQueue.put(new TO(2),100);
-        TRetrive t1 = new TRetrive(timeQueue);
-        TRetrive t2 = new TRetrive(timeQueue);
+        TRetrive t1 = new TRetrive(timeQueue, "1");
+        TRetrive t2 = new TRetrive(timeQueue, "2");
         long startTime = timeQueue.startTime();
         t1.start();
         t2.start();
@@ -63,9 +114,11 @@ public class TimeQueueTest {
     public static class TRetrive extends Thread{
         TimeQueue timeQueue;
         long retriveTimestamp;
-        public TRetrive(TimeQueue timeQueue){
+        public TRetrive(TimeQueue timeQueue, String threadId){
             this.timeQueue = timeQueue;
+            this.setName("MTreadId-"+threadId);
         }
+
         public void run(){
             timeQueue.get();
             this.retriveTimestamp = System.currentTimeMillis();

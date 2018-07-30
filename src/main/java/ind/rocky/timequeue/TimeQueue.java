@@ -5,14 +5,16 @@ import java.util.Queue;
 
 public class TimeQueue<T> {
     Queue<Pack<T>> queue = new LinkedList<>();
-    long expectTimestamp;
+    long expectTimestamp=-1;
     public void put(T to, long i) {
         queue.add(new Pack<T>(to, i));
     }
 
     public T get() {
-        Pack<T> pack = queue.poll();
-        expectTimestamp+=pack.duration;
+        if (isNotStarted()){
+            throw new NotStartedException();
+        }
+        Pack<T> pack = synGetPack();
         long timeToSleep=expectTimestamp-System.currentTimeMillis();
         if (timeToSleep>0) {
             try {
@@ -22,6 +24,16 @@ public class TimeQueue<T> {
             }
         }
         return pack.t;
+    }
+
+    private synchronized Pack<T> synGetPack() {
+        Pack<T> pack = queue.poll();
+        expectTimestamp+=pack.duration;
+        return pack;
+    }
+
+    private boolean isNotStarted() {
+        return expectTimestamp==-1;
     }
 
     public long startTime() {
